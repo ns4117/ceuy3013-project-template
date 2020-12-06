@@ -2,9 +2,9 @@
 # of importing a class from "source.py", instantiating a new object and printing
 # that object. Replace the code below with your own.
 
-from source import TestClass
+from source import Channel
 
-t = TestClass(5)
+ch = Channel(160, 2, 2, 0.014, 0.0034, 83700, 15, 17)
 
 if __name__ == '__main__':
-    print(t)
+    print(ch)

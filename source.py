@@ -24,6 +24,9 @@ class Channel:
         self.y1 = y1
         self.y2 = y2
 
+    def __str__(self):
+        return 'This is a channel with various parameters'
+
     # Top width T
     def top(self, y):
         return self.b + y * (self.zleft + self.zright)
@@ -142,8 +145,3 @@ class Channel:
         step = abs(self.y1-self.y2)/1000    # make distance of each step
                                             # equal to 1/1000 of the vertical
                                             # distance between the two points
-
-
-ch = Channel(160, 2, 2, 0.014, 0.0034, 83700, 15, 17)
-
-print(ch.downstream())
