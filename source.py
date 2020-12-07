@@ -168,12 +168,26 @@ class Channel:
 
         g = 32.2
 
-        y = ystart # start iterating at the smallest step
+        y = ystart  # start iterating at the smallest step
+
+        i = 0       # keep count of index since y cannot be used as index
+                    # because decimal
         while y < ystop:
+
             a_list.append(area(y))
             p_list.append(wet_perim(y))
             r_list.append(hyd_rad(y))
             v_list.append(self.q/area(y))
-            vhead_list.append(self.alpha * v_list[y]**2 / 2*g)
+            vhead_list.append(self.alpha * v_list[i]**2 / 2*g)
+            e_list.append(y + vhead_list[i])
+            if i == 0:
+                delta_e_list.append(0)
+            else:
+                delta_e_list.append(e_list[i] - e_list[i-1])
+            
+
+
+
+            i += 1
 
             y += step
