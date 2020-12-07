@@ -58,9 +58,9 @@ class Channel:
         def norm(y):
             return (1.49/self.n) * np.sqrt(self.slope) * self.area(y) * self.hyd_rad(y)**(2/3) - self.q
 
-        return fsolve(norm, x0=1)[0]  # use initial guesss of 1
-                                  # will return 1-D array by default,
-                                  # so pull first value
+        return fsolve(norm, x0=1)[0]    # use initial guesss of 1
+                                        # will return 1-D array by default,
+                                        # so pull first value
 
     def crit_depth(self):
         """
@@ -97,24 +97,26 @@ class Channel:
         type of channel profile.
         """
 
-        if self.y1 == None or self.y2 == None:  # skip further calculations
-            return                                # if depths are not passed
+        if (self.y1 == None or self.y2 == None) or (self.y1-self.y2 == 0 ):
+            return                          # skip further calculations
+                                            # if depths are not passed
+                                            # or if both depths are same
 
         # Mild slopes
         if self.norm_depth() > self.crit_depth():
-            # M1 slope
+            # M1 slope, deeper downstream
             if self.y1 > self.norm_depth():
                 if self.y1 > self.y2:
                     return 'Point 1 is downstream of Point 2'
                 else:
                     return 'Point 2 is downstream of Point 1'
-            # M3 slope
+            # M3 slope, deeper downstream
             if self.y1 < self.crit_depth():
                 if self.y1 > self.y2:
                     return 'Point 1 is downstream of Point 2'
                 else:
                     return 'Point 2 is downstream of Point 1'
-            # M2 slope
+            # M2 slope, deeper upstream
             else:
                 if self.y1 > self.y2:
                     return 'Point 2 is downstream of Point 1'
@@ -122,19 +124,19 @@ class Channel:
                     return 'Point 1 is downstream of Point 2'
         # Steep slopes
         else:
-            # S1 slope
+            # S1 slope, deeper downstream
             if self.y1 > self.crit_depth():
                 if self.y1 > self.y2:
                     return 'Point 1 is downstream of Point 2'
                 else:
                     return 'Point 2 is downstream of Point 1'
-            # S3 slope
+            # S3 slope, deeper downstream
             if self.y1 < self.norm_depth():
                 if self.y1 > self.y2:
                     return 'Point 1 is downstream of Point 2'
                 else:
                     return 'Point 2 is downstream of Point 1'
-            # S2 slope
+            # S2 slope, deeper upstream
             else:
                 if self.y1 > self.y2:
                     return 'Point 2 is downstream of Point 1'
