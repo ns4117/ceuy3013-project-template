@@ -10,11 +10,15 @@ class Channel:
     to be conveyed. Capable of computing top width, water area, wetted perimeter,
     hydraulic radius, normal depth, critical depth, determining if channel slope
     is mild or steep. There is also the option to pass the depth of the channel
-    at two points, y1 and y2, which cannot be equal. If these are passed, the
-    class can determine which point is downstream and use the direct step method
-    to determine the distance along the channel between the two points.
+    y1 and y2 at two points, which cannot be equal, and the velocity correction
+    factor alpha, which by default is equal to 1. If y1 and y2 are passed,
+    the class can determine which point is downstream and use the direct step
+    method to determine the distance along the channel between the two points.
     """
-    def __init__(self, b, zleft, zright, n, slope, q, y1=None, y2=None):
+    def __init__(self, b, zleft, zright, n, slope, q, y1=None, y2=None, alpha=1):
+        """
+        Constructor
+        """
         self.b = b
         self.zleft = zleft
         self.zright = zright
@@ -23,6 +27,7 @@ class Channel:
         self.q = q
         self.y1 = y1
         self.y2 = y2
+        self.alpha = alpha
 
     def __str__(self):
         return 'This is a channel with various parameters'
@@ -97,7 +102,7 @@ class Channel:
         type of channel profile.
         """
 
-        if (self.y1 == None or self.y2 == None) or (self.y1-self.y2 == 0 ):
+        if (self.y1 == None or self.y2 == None) or (self.y1 - self.y2 == 0 ):
             return                          # skip further calculations
                                             # if depths are not passed
                                             # or if both depths are same
@@ -147,3 +152,28 @@ class Channel:
         step = abs(self.y1-self.y2)/1000    # make distance of each step
                                             # equal to 1/1000 of the vertical
                                             # distance between the two points
+
+        ystart = min(self.y1, self.y2)      # start from smallest depth
+        ystop = max(self.y1, self.y2)       # end at largest depths
+
+        a_list = []         # list of areas
+        p_list = []         # list of wetted perimeters
+        r_list = []         # list of hydraulic radii
+        v_list = []         # list of velocities
+        vhead_list = []     # list of velocity heads
+        e_list []           # list of specific energies
+        delta_e_list = []   # list of changes in specific energy
+        sf_list = []        # list of water surface slopes
+        sf_avg_list = []    # list of averaged water surface slopes
+
+        g = 32.2
+
+        y = ystart # start iterating at the smallest step
+        while y < ystop:
+            a_list.append(area(y))
+            p_list.append(wet_perim(y))
+            r_list.append(hyd_rad(y))
+            v_list.append(self.q/area(y))
+            vhead_list.append(self.alpha * v_list[y]**2 / 2*g)
+
+            y += step
