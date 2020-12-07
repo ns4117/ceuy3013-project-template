@@ -157,13 +157,12 @@ class Channel:
         ystop = max(self.y1, self.y2)       # end at largest depths
 
         a_list = []         # list of areas
-        p_list = []         # list of wetted perimeters
         r_list = []         # list of hydraulic radii
         v_list = []         # list of velocities
         vhead_list = []     # list of velocity heads
-        e_list []           # list of specific energies
+        e_list = []         # list of specific energies
         delta_e_list = []   # list of changes in specific energy
-        sf_list = []        # list of water surface slopes
+        sf_list = []        # list of water surface slopes, using Manning
         sf_avg_list = []    # list of averaged water surface slopes
 
         g = 32.2
@@ -174,20 +173,23 @@ class Channel:
                     # because decimal
         while y < ystop:
 
-            a_list.append(area(y))
-            p_list.append(wet_perim(y))
-            r_list.append(hyd_rad(y))
-            v_list.append(self.q/area(y))
+            a_list.append(self.area(y))
+            r_list.append(self.hyd_rad(y))
+            v_list.append(self.q/self.area(y))
             vhead_list.append(self.alpha * v_list[i]**2 / 2*g)
+            
             e_list.append(y + vhead_list[i])
             if i == 0:
                 delta_e_list.append(0)
             else:
                 delta_e_list.append(e_list[i] - e_list[i-1])
-            
-
-
+                
+            sf = ((self.q * self.n) / (1.49 * a_list[i] * r_list[i]**(2/3)))**2
+            sf_list.append(sf)
+            if i == 0:
+                sf_avg_list.append(0)
+            else:
+                sf_avg_list.append((sf_list[i] + sf_list[i-1])/2)        
 
             i += 1
-
             y += step
