@@ -14,7 +14,9 @@ class Channel:
     y1 and y2 at two points, which cannot be equal, and the velocity correction
     factor alpha, which by default is equal to 1. If y1 and y2 are passed,
     the class can determine which point is downstream and use the direct step
-    method to determine the distance along the channel between the two points.
+    method to determine the distance along the channel between the two points,
+    as well as displaying a graph of the water surface and channel bottom if
+    'tograph = True' is passed.
     """
     def __init__(self, b, zleft, zright, n, slope, q, y1=None, y2=None, alpha=1):
         """
@@ -33,20 +35,30 @@ class Channel:
     def __str__(self):
         return 'This is a channel with various parameters'
 
-    # Top width T
+    
     def top(self, y):
+        """ 
+        Calculates the top width T of a channel
+        """
         return self.b + y * (self.zleft + self.zright)
 
-    # Water Area A using area of trapezoid formula
     def area(self, y):
+        """
+        Calculates the water area A using area of trapezoid formula
+        """
         return ((self.b+self.top(y))/2) * y
 
-    # wetted perimeter P
     def wet_perim(self, y):
+        """ 
+        Calculates the wetted perimeter P (the length of the wet portion of
+                                           the channel)
+        """
         return np.sqrt(y**2 + (y*self.zleft)**2) + self.b + np.sqrt(y**2 + (y*self.zright)**2)
 
-    # Hydraulic radius R = A/P
     def hyd_rad(self, y):
+        """
+        Calculates the hydraulic radius R defined as R = A/P
+        """
         return self.area(y)/self.wet_perim(y)
 
     def norm_depth(self):
@@ -102,11 +114,9 @@ class Channel:
         Determines whether Point 1 or Point 2 is downstream based on the
         type of channel profile.
         """
-
+        # skip further calculations if depths are not passed or both same
         if (self.y1 == None or self.y2 == None) or (self.y1 - self.y2 == 0 ):
-            return                          # skip further calculations
-                                            # if depths are not passed
-                                            # or if both depths are same
+            return                          
 
         # Mild slopes
         if self.norm_depth() > self.crit_depth():
@@ -150,10 +160,10 @@ class Channel:
                     return 'Point 1 is downstream of Point 2'
 
     def direct_step(self, tograph = None):
-        step = abs(self.y1-self.y2)/1000    # make distance of each step
-                                            # equal to 1/1000 of the vertical
-                                            # distance between the two points
-                                            # arbitrary decision
+        # Arbitrary decision: make distance of each step equal to 1/1000
+        # of the vertical distance between the two points
+        # small step size ensures accurate results
+        step = abs(self.y1-self.y2)/1000
 
         ystart = min(self.y1, self.y2)      # start from smallest depth
         ystop = max(self.y1, self.y2)       # end at largest depths
@@ -179,8 +189,11 @@ class Channel:
             a_list.append(self.area(y)) # calculate properties and add to list
             r_list.append(self.hyd_rad(y)) 
             v_list.append(self.q/a_list[i])
+            
+            # velocity head = alpha * v^2 / 2g
             vhead_list.append((self.alpha * v_list[i]**2) / two_g)
             
+            # E = y + velocity head
             e_list.append(y + vhead_list[i]) # specific energy
             if i == 0:
                 delta_e_list.append(0)  # change in specific energy, not 
@@ -189,6 +202,8 @@ class Channel:
                 delta_e_list.append(e_list[i] - e_list[i-1])
             
             # long calculation so calculate first then append
+            # based on rearranging Manning equation for slope
+            # Q = 1.49/n A R^2/3 S^1/2 -> S = ((Qn)/(1.49*A*R^2/3))^2
             sf = ((self.q * self.n) / (1.49 * a_list[i] * r_list[i]**(2/3)))**2
             sf_list.append(sf)
             if i == 0:
@@ -197,8 +212,9 @@ class Channel:
                 sf_avg_list.append((sf_list[i] + sf_list[i-1])/2)    
             
             # change in distance
+            # defined as delta E / (channel slope - averge water slope)
             if i == 0:
-                delta_x_list.append(0)
+                delta_x_list.append(0) # no change yet for first element 
             else:
                 delta_x_list.append((delta_e_list[i] / (self.slope - sf_avg_list[i])))
             
@@ -206,6 +222,8 @@ class Channel:
                 cum_x_list.append(0)
             else:
                 cum_x_list.append(delta_x_list[i] + cum_x_list[i-1])
+                # cumulative distance is distance for this iteration plus
+                # the cumulative distance so far
             
             i += 1
             y += step
@@ -221,6 +239,7 @@ class Channel:
                                                     # case distances negative
             
             # determine which point to start from
+            # making sure to start from upstream point
             if self.downstream() == 'Point 1 is downstream of Point 2':
                 y = np.linspace(self.y2, self.y1, 1001)
             elif self.downstream() == 'Point 2 is downstream of Point 1':
@@ -228,6 +247,8 @@ class Channel:
             else: 
                 return 'Upstream point could not be determined'
             
+            # the channel bottom can be modeled with a function starting from
+            # the initial depth and continuing with m = -slope
             def slopefun(x):
                 slope_y = []
                 for i in range(len(x)):
@@ -235,9 +256,10 @@ class Channel:
                 
                 return slope_y
                 
-            plt.plot(x, y, color='blue')
-            plt.plot(x, slopefun(x) ,color='black')
+            plt.plot(x, y, color='blue', label='Water Surface')
+            plt.plot(x, slopefun(x) ,color='black', label='Channel Bottom')
             plt.title('Graph of Water Surface Between Points 1 and 2', fontweight='black', fontfamily='monospace')
             plt.xlabel('Distance Along Channel', fontweight='bold')
             plt.ylabel('Depth')
+            plt.legend(loc="upper right")
             plt.show()
