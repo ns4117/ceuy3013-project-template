@@ -209,6 +209,7 @@ class Channel:
             i += 1
             y += step
         
-        print('Points 1 and 2 are ', abs(cum_x_list[i-1]), ' ft apart')
+        # pull last cumulative distance
+        print('Points 1 and 2 are ', abs(cum_x_list[-1]), ' ft apart')
             
             
