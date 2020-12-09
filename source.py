@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize import fsolve
+import matplotlib.pyplot as plt
 
 class Channel:
     """
@@ -148,7 +149,7 @@ class Channel:
                 else:
                     return 'Point 1 is downstream of Point 2'
 
-    def direct_step(self):
+    def direct_step(self, tograph = None):
         step = abs(self.y1-self.y2)/1000    # make distance of each step
                                             # equal to 1/1000 of the vertical
                                             # distance between the two points
@@ -211,5 +212,32 @@ class Channel:
         
         # pull last cumulative distance
         print('Points 1 and 2 are ', abs(cum_x_list[-1]), ' ft apart')
+        
+        if tograph == None:
+            return
+        else:
+            # creating names for variables for convenience
+            x =  [abs(ele) for ele in cum_x_list]   # take abs value just in 
+                                                    # case distances negative
             
+            # determine which point to start from
+            if self.downstream() == 'Point 1 is downstream of Point 2':
+                y = np.linspace(self.y2, self.y1, 1001)
+            elif self.downstream() == 'Point 2 is downstream of Point 1':
+                y = np.linspace(self.y1, self.y2, 1001)
+            else: 
+                return 'Upstream point could not be determined'
             
+            def slopefun(x):
+                slope_y = []
+                for i in range(len(x)):
+                    slope_y.append(-self.slope * x[i] + y[0])
+                
+                return slope_y
+                
+            plt.plot(x, y, color='blue')
+            plt.plot(x, slopefun(x) ,color='black')
+            plt.title('Graph of Water Surface Between Points 1 and 2', fontweight='black', fontfamily='monospace')
+            plt.xlabel('Distance Along Channel', fontweight='bold')
+            plt.ylabel('Depth')
+            plt.show()
