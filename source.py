@@ -152,6 +152,7 @@ class Channel:
         step = abs(self.y1-self.y2)/1000    # make distance of each step
                                             # equal to 1/1000 of the vertical
                                             # distance between the two points
+                                            # arbitrary decision
 
         ystart = min(self.y1, self.y2)      # start from smallest depth
         ystop = max(self.y1, self.y2)       # end at largest depths
@@ -162,34 +163,52 @@ class Channel:
         vhead_list = []     # list of velocity heads
         e_list = []         # list of specific energies
         delta_e_list = []   # list of changes in specific energy
-        sf_list = []        # list of water surface slopes, using Manning
+        sf_list = []        # list of water surface slopes, using Manning eq
         sf_avg_list = []    # list of averaged water surface slopes
+        delta_x_list = []   # list of distances so far
+        cum_x_list = []     # list of cumulative distance traveled
 
-        g = 32.2
+        two_g = 64.4 # 2*32.2
 
         y = ystart  # start iterating at the smallest step
 
-        i = 0       # keep count of index since y cannot be used as index
-                    # because decimal
+        i = 0       # keep count of index as append to lists
+        
         while y < ystop:
-
-            a_list.append(self.area(y))
-            r_list.append(self.hyd_rad(y))
-            v_list.append(self.q/self.area(y))
-            vhead_list.append(self.alpha * v_list[i]**2 / 2*g)
+            a_list.append(self.area(y)) # calculate properties and add to list
+            r_list.append(self.hyd_rad(y)) 
+            v_list.append(self.q/a_list[i])
+            vhead_list.append((self.alpha * v_list[i]**2) / two_g)
             
-            e_list.append(y + vhead_list[i])
+            e_list.append(y + vhead_list[i]) # specific energy
             if i == 0:
-                delta_e_list.append(0)
+                delta_e_list.append(0)  # change in specific energy, not 
+                                        # defined for first element 
             else:
                 delta_e_list.append(e_list[i] - e_list[i-1])
-                
+            
+            # long calculation so calculate first then append
             sf = ((self.q * self.n) / (1.49 * a_list[i] * r_list[i]**(2/3)))**2
             sf_list.append(sf)
             if i == 0:
                 sf_avg_list.append(0)
             else:
-                sf_avg_list.append((sf_list[i] + sf_list[i-1])/2)        
-
+                sf_avg_list.append((sf_list[i] + sf_list[i-1])/2)    
+            
+            # change in distance
+            if i == 0:
+                delta_x_list.append(0)
+            else:
+                delta_x_list.append((delta_e_list[i] / (self.slope - sf_avg_list[i])))
+            
+            if i == 0:
+                cum_x_list.append(0)
+            else:
+                cum_x_list.append(delta_x_list[i] + cum_x_list[i-1])
+            
             i += 1
             y += step
+        
+        print('Points 1 and 2 are ', abs(cum_x_list[i-1]), ' ft apart')
+            
+            

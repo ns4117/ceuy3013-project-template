@@ -4,7 +4,9 @@
 
 from source import Channel
 
-ch = Channel(160, 2, 2, 0.014, 0.0034, 83700, 15, 17)
+ch = Channel(b=160, zleft=2, zright=2, n=0.014, slope=0.0034, q=83700, y1=15, y2=17, alpha=1.05)
 
-if __name__ == '__main__':
-    print(ch)
+# if __name__ == '__main__':
+#     print(ch)
+
+print(ch.direct_step())
