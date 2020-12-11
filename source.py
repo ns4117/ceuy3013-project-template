@@ -262,7 +262,7 @@ class Channel:
             def slopefun(x):
                 slope_y = []
                 for i in range(len(x)):
-                    slope_y.append(-self.slope * x[i] + y[0])
+                    slope_y.append(-self.slope * x[i])
                 
                 return slope_y
                 
@@ -271,5 +271,5 @@ class Channel:
             plt.title('Graph of Water Surface Between Points 1 and 2', fontweight='black', fontfamily='monospace')
             plt.xlabel('Distance Along Channel', fontweight='bold')
             plt.ylabel('Depth')
-            plt.legend(loc="upper right")
+            plt.legend(bbox_to_anchor=(0.5, -0.3), loc="center")
             plt.show()
