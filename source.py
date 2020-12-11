@@ -4,19 +4,24 @@ import matplotlib.pyplot as plt
 
 class Channel:
     """
-    Calculates parameters for an open channel. Pass the bottom width b in feet,
-    the side slopes zleft and zright (z is the horizontal distance corresponding
-    to a vertical rise of 1), Manning's n, the longitudinal slope of the channel
-    as a decimal (e.g. 6% slope is passed as 0.06), and the flowrate q in ft3/s
-    to be conveyed. Capable of computing top width, water area, wetted perimeter,
-    hydraulic radius, normal depth, critical depth, determining if channel slope
-    is mild or steep. There is also the option to pass the depth of the channel
-    y1 and y2 at two points, which cannot be equal, and the velocity correction
-    factor alpha, which by default is equal to 1. If y1 and y2 are passed,
-    the class can determine which point is downstream and use the direct step
-    method to determine the distance along the channel between the two points,
-    as well as displaying a graph of the water surface and channel bottom if
-    'tograph = True' is passed.
+    Calculates parameters for a prismatic rectangular or trapezoidal channel. 
+    Pass the bottom width b in feet, the side slopes zleft and zright (z is the
+    horizontal distance corresponding to a vertical rise of 1), Manning's n, 
+    the longitudinal slope of the channel as a decimal (e.g. 6% as 0.06), and 
+    the flowrate q in cfs to be conveyed. For a rectangular channel, pass 
+    zleft = zright = 0, otherwise pass values for the sideslopes of a 
+    trapezoidal channel. Capable of computing top width, water  area, wetted
+    perimeter, hydraulic radius, normal depth, critical depth, determining if
+    channel slope is mild or steep. There is also the option to pass the depth 
+    of the channel y1 and y2 at two points, which cannot be equal, and the
+    velocity correction factor alpha, which by default is equal to 1. 
+    If y1 and y2 are passed, the class can determine which point is downstream
+    and use the direct step method to determine the distance along the channel
+    between the two points, as well as displaying a graph of the water surface
+    and channel bottom if 'tograph = True' is passed.
+    
+    Methods are top(y), area(y), wet_perim(y), hyd_rad(y), norm_depth(), 
+    crit_depth(), slope_cat(), downstream(), and direct_step(tograph)
     """
     def __init__(self, b, zleft, zright, n, slope, q, y1=None, y2=None, alpha=1):
         """
@@ -38,38 +43,38 @@ class Channel:
     
     def top(self, y):
         """ 
-        Calculates the top width T of a channel
+        Calculates the top width T of a channel when the water depth y is passed
         """
         return self.b + y * (self.zleft + self.zright)
 
     def area(self, y):
         """
-        Calculates the water area A using area of trapezoid formula
+        Calculates the water area A using area of trapezoid formula when the
+        water depth y is passed
         """
         return ((self.b+self.top(y))/2) * y
 
     def wet_perim(self, y):
         """ 
         Calculates the wetted perimeter P (the length of the wet portion of
-                                           the channel)
+        the channel) when the water depth y is passed
         """
         return np.sqrt(y**2 + (y*self.zleft)**2) + self.b + np.sqrt(y**2 + (y*self.zright)**2)
 
     def hyd_rad(self, y):
         """
-        Calculates the hydraulic radius R defined as R = A/P
+        Calculates the hydraulic radius R (defined as R = A/P) when the water 
+        depth y is passed
         """
         return self.area(y)/self.wet_perim(y)
 
     def norm_depth(self):
         """
-        Calculates and returns the normal depth for a channel given the bottom
-        width b (ft), side slopes zleft & zright, Manning's n, the longitudinal
-        slope of the channel inputted as a decimal, and the flowrate q (cfs) to
-        convey. For a rectangular channel, input zleft=zright=0, otherwise give
-        side slope values for trapezoidal channels. z is the horizontal distance
-        corresponding to a vertical rise of 1. Assumes US units so k=1.49 in
-        Manning equation
+        Takes no inputs. Calculates and returns the normal depth for an
+        object of the 'Channel' class when the bottom width width b (ft), side
+        slopes zleft & zright, Manning's n, the longitudinal slope of the channel
+        (as a decimal), and the flowrate q (cfs) have been passed to the
+        constructor. Assumes US units so k=1.49 in Manning equation
         """
         # Based on manning equation
         # Q = k/n AR^2/3 S^1/2 -> ((k/n) * S^1/2) * A * R^2/3 - Q = 0
@@ -82,12 +87,10 @@ class Channel:
 
     def crit_depth(self):
         """
-        Calculates and returns the critical depth for a channel given
-        the bottom width b (ft), side slopes zleft and zright, and the flowrate
-        q (cfs) to convey. For a rectangular channel, input zleft=zright=0,
-        otherwise give side slope values for trapezoidal channels. z is the
-        horizontal distance corresponding to a vertical rise of 1. Assumes US
-        units so g=32.2 ft/s^2
+        Takes no inputs. Calculates and returns the critical depth for an object
+        of the 'Channel' class when the bottom width b (ft), side slopes zleft 
+        and zright, and the flowrate q (cfs) have been passed to the constructor.
+        Assumes US units so g=32.2 ft/s^2
         """
         # Crit depth, based on specific energy
         # Q^2/g = A^3/T -> A^3/T - Q^2/g = 0
@@ -98,8 +101,8 @@ class Channel:
 
     def slope_cat(self):
         """
-        Determines whether a profile is mild or steep depending on whether
-        yn < yc (steep) or yn > yc (mild)
+        Takes no inputs. Determines whether a profile is mild or steep depending
+        on whether yn < yc (steep) or yn > yc (mild)
         """
         if self.norm_depth() < self.crit_depth():
             mild_steep = 'steep'
@@ -111,8 +114,8 @@ class Channel:
 
     def downstream(self):
         """
-        Determines whether Point 1 or Point 2 is downstream based on the
-        type of channel profile.
+        Takes no inputs. Determines whether Point 1 or Point 2 is downstream 
+        based on the type of channel profile from slope_cat. 
         """
         # skip further calculations if depths are not passed or both same
         if (self.y1 == None or self.y2 == None) or (self.y1 - self.y2 == 0 ):
@@ -160,6 +163,13 @@ class Channel:
                     return 'Point 1 is downstream of Point 2'
 
     def direct_step(self, tograph = None):
+        """ 
+        Uses the direct step method to calculate the distance between two
+        depths y1 and y2 which should have been passed to the class constructor.
+        Takes no inputs other than an optional value of tograph, which can
+        is set to None by default. If you would like a graph of the water
+        surface and channel bottom, pass a value for tograph that is NOT None. 
+        """
         # Arbitrary decision: make distance of each step equal to 1/1000
         # of the vertical distance between the two points
         # small step size ensures accurate results
