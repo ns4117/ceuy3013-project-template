@@ -33,6 +33,8 @@ To use the program, download this repository, create and activate a virtual envi
 
 
 ## Use
+_**Note: all example problems copyright of Anne Dudek Ronan, PhD, PE**_
+
 Consider the problem shown below
 ![hw8prob4](hw8prob4.png)
 
