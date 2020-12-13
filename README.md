@@ -1,88 +1,76 @@
-# CE-UY 3013 Project Template
+# Rectangular and Trapezoidal Prismatic Open Channel Program
 
-*This file presents a description of the final project. For your submission,*
-*this file must serve as the documentation of your project, how your program*
-*should be used along with examples.*
+## Description
+This program calculates various parameters for prismatic rectangular and trapezoidal open channels. 
+For this program, the open channel must be **prismatic**, meaning that the empty channel must have a constant cross-section. 
+This program uses US units for all parameters and outputs, meaning lengths and depths **must** be passed in feet, flowrates in cfs, etc. This affects various coefficients like the acceleration due to gravity and the value of *k* in the Manning equation. This also means that calculated areas will be in square feet, calculated depths will be in feet, etc. 
 
-This is the final project template for *CE-UY 3013 Computing In Civil Engineering*.
-Your project must follow this template and must be hosted on GitHub. Pay
-attention to the contents of this repository.
+Below are the required and optional inputs for an instance of the class, all of which must be passed when initiating an instance of the class using the constructor 
 
+Required Inputs 
+* Bottom width *b* in feet
+* Left and right sideslopes *zleft* and *zright* (unitless). *z* is the horizontal distance corresponding to a vertical rise of 1. (i.e. a 2H:1V slope has *z*=2) 
+* Manning's *n* (unitless)
+* Longitudinal *slope* of the channel as a decimal (i.e. 6% -> 0.06)
+* Flowrate *q* in cubic feet per second (cfs) 
+
+Optional Inputs
+* Depth *y* of the channel in feet at two points: *y1* and *y2* (cannot be equal). 
+* Velocity correction factor *alpha* (assumed to be 1 unless otherwise specified).
+
+Methods
+* top(*y*)--calculates the top width *T* of the channel when the water level is at a given depth *y*
+* area(*y*)--calculates the water area *A* of the channel when the water level is at a given depth *y*
+* wet_perim(*y*)--calculates the wetted perimeter *P* of the channel when the water level is at a given depth *y*
+* hyd_rad(*y*)--calcualtes the hydraulic radius *R*, which is defined as *A*/*P*
+* norm_depth()--takes no inputs; calculates the normal depth *yn* of the channel for a given flowrate *q* using the Manning Equation
+* crit_depth()--takes no inputs; calculates the critical depth *yc* of the channel for a given flowrate *q* by minimizing the specific energy
+* downstream()--takes no inputs; determines which point is downstream of the other **if** *y1* and *y2* were passed when the class instance was created
+* direct_step(*tograph*)---calculates the distance along the channel between depths *y1* and *y2* if values for both variables were passed when creating the class instance and, optionally if *tograph*=*value* is passed, creates a graph of the water surface and the channel bottom.
+
+## Setup
+To use the program, download this repository, create and activate a virtual environment in the local directory, and install the required libraries and their versions. See [Virtual Environments and Packages](https://docs.python.org/3/tutorial/venv.html) for details. 
+
+
+## Use
+Consider the problem shown below
+![hw8prob4](hw8prob4.png)
+
+This problem does not mention the depth at any point so the downstream and direct_step methods cannot be used here.
+
+First create a new instance of the Channel class
+
+```python
+>>> ch = Channel(b=12, zleft=0, zright=0, n=0.015, slope=0.0087, q=300)
 ```
-.
-├── input (optional)
-│   └── README.md
-├── output (optional)
-│   └── README.md
-├── .gitignore
-├── README.md
-├── requirements.txt
-├── source.py
-└── test.py
+
+There are a few notes to make here. One, note that zleft=zright=0 because the problem in question is about a rectangular channel, which has no sideslope. Second, note that the slope was passed as 0.0087, which is the value of tan(0.5 deg). 
+
+To find the value of, say, the normal depth, use
+
+```python
+print(ch.norm_depth())
+```
+which returns about 2.04 ft. 
+
+Various other parameters for this channel could be calculated, such as the water area, wetted perimeter, hydraulic radius, and critical depth.
+
+---
+
+Next, consider the problem shown below.
+![hw9prob2](hw9prob2.png)
+
+For this problem, all methods, including downstream and direct_step, are available to use. Like above, initiate a class instance using 
+
+```python
+ch = Channel(b=160, zleft=2, zright=2, n=0.014, slope=0.0034, q=83700, y1=15, y2=17, alpha=1.05)
 ```
 
-Your project must have exactly the same structure, with exactly the same
-file names, except for the ``input`` and ``output`` directories that are
-optional and should only be used if you write a program that processes
-one or more data files. Here are two examples of proper use of the input and
-output directories: [ex1](https://github.com/InsightDataScience/Purchase-Analytics), [ex2](https://github.com/InsightDataScience/h1b_statistics)
+Note that alpha was passed here since a value was given. If nothing is passed for alpha, it is assumed to be equal to 1. 
 
+To calculate the distance between points 1 and 2, which have depths y1 and y2 respectively, use
 
-## Requirements
-
-*Python 3 projects only, no Python 2.*
-
-This will be a solo project, the requirements are such that can be comfortably
-handled by a single student. The goal is to write a program that performs a
-series of **meaningful** tasks within Civil Engineering and can be easily used
-by others. This requires code that is clean, comprehensible, does not return
-unexpected errors and is accompanied by sufficient documentation.
-
-What is a *meaningful* task? There is really no need to overthink this. In this
-course we looked at examples from structural analysis, pile foundations,
-traffic engineering and more. In other courses you were introduced to the
-methods and processes governing environmental engineering, steel design, concrete design, engineering mechanics, project management, fluid mechanics, water resources
-engineering, geotechnical engineering and much more. These methods and processes
-involve a series of manual calculations and checks considering multiple parameters.
-
-If I asked you to produce a flowchart of the process you followed in most of the
-assignments you have tackled so far in this program, you would have done so
-without much trouble. My point here is that you have been working with algorithms
-for quite some time already, now is the time to pick one of significant value and
-complexity and implement it in Python. From my experience, any analytical
-process that relies on a reference manual can be implemented in Python.
-
-You will have to submit your project proposal for approval first. Do so ASAP on
-NYU Classes. All projects must be unique, rule of dibs applies.
-
-
-## Grading
-
-* Practicality: 30%
-* Execution: 50%
-* Documentation and examples: 20%
-
-**Practicality:** Use common sense, this is an assignment that weighs 20% on your
-final grade, a simple program won't cut it. Use your combined effort on all class
-assignments as a reference (they also weigh 20% on your grade) Focus on preparing
-a thorough project proposal so that your instructor can comment on the usefulness
-of your project. At the same time, think how your project will benefit yourself
-and your colleagues (i.e. will this tool make you more efficient with your
-coursework? is this a tool that simplifies tedious and error-prone calculations?
-does this tool produce visualizations?)
-
-**Execution:** Clean, error-free code with lots of comments is key. Once again,
-use common sense: it is probably best to make it easy for the grader to go
-through the code than have them struggle to understand what's happening.
-Absolutely no unexpected errors, make sure to test your code before submitting.
-
-**Documentation and examples:** This README file presents the project description
-right now but for your project it must provide a detailed description of your
-program, and how it should be used with examples. Make sure to check this
-[Markdown guide](https://guides.github.com/features/mastering-markdown/)
-for tips on how to better present your work.
-
-
-Your submission will go undergo several plagiarism checks. There is risk of a
-failing score, without warning, if it becomes evident that your code comes from
-other public projects.
+```python
+print(ch.direct_step(tograph=True))
+```
+which returns a distance of about 1340 ft and a graph of the water surface and channel bottom. To surpress graph printing, pass no value for *tograph* 
