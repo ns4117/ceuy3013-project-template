@@ -49,7 +49,7 @@ There are a few notes to make here. One, note that zleft=zright=0 because the pr
 To find the value of, say, the normal depth, use
 
 ```python
-print(ch.norm_depth())
+>>> print(ch.norm_depth())
 ```
 which returns about 2.04 ft. 
 
@@ -63,7 +63,7 @@ Next, consider the problem shown below.
 For this problem, all methods, including downstream and direct_step, are available to use. Like above, initiate a class instance using 
 
 ```python
-ch = Channel(b=160, zleft=2, zright=2, n=0.014, slope=0.0034, q=83700, y1=15, y2=17, alpha=1.05)
+>>> ch = Channel(b=160, zleft=2, zright=2, n=0.014, slope=0.0034, q=83700, y1=15, y2=17, alpha=1.05)
 ```
 
 Note that values were passed for the sideslopes since this is a *trapezoidal* channel, not a rectangular one. Also note that alpha was passed here since a value was given. If nothing is passed for alpha, it is assumed to be equal to 1. 
@@ -71,12 +71,12 @@ Note that values were passed for the sideslopes since this is a *trapezoidal* ch
 To calculate the distance between points 1 and 2, which have depths y1 and y2 respectively, use
 
 ```python
-print(ch.direct_step(tograph=True))
+>>> print(ch.direct_step(tograph=True))
 ```
 which returns a distance of about 1340 ft and a graph of the water surface and channel bottom. To surpress graph printing, pass no value for *tograph* 
 
 If we also wanted to return the cross-sectional area of the water when the depth *y*=15 ft, we could do
 ```python
-print(ch.area(15))
+>>> print(ch.area(15))
 ```
 which returns an area of 2850 (square feet). 
